@@ -30,7 +30,6 @@ export const createUser = async (req: Request, res: Response) => {
 export const login = async (req: Request, res: Response) => {
 
     const user: any = await User.findOne({ email: req.body.email });
-    console.log(user);
     
     if (!user) {
       return res.json({ error: 'Invalid credentials' });

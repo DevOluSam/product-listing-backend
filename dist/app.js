@@ -19,7 +19,9 @@ const morgan_1 = __importDefault(require("morgan"));
 require("dotenv/config");
 const index_1 = __importDefault(require("./routes/index"));
 const users_1 = __importDefault(require("./routes/users"));
+const products_1 = __importDefault(require("./routes/products"));
 const mongoose_1 = __importDefault(require("mongoose"));
+const cors_1 = __importDefault(require("cors"));
 const db = process.env.DATABASE_URI;
 main().catch(err => console.log(err));
 function main() {
@@ -33,6 +35,23 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
 app.use(express_1.default.static(path_1.default.join(__dirname, 'public')));
+app.use((0, cors_1.default)({
+    origin: 'http://localhost:5173',
+    optionsSuccessStatus: 200
+}));
 app.use('/', index_1.default);
 app.use('/users', users_1.default);
+app.use('/product', products_1.default);
+// (async () => {
+//     // Set the image to upload
+//     const imagePath = 'https://cloudinary-devs.github.io/cld-docs-assets/assets/images/happy_people.jpg';
+//     // Upload the image
+//     const publicId = await uploadImage(imagePath);
+//     // Get the colors in the image
+//     const colors = await getAssetInfo(publicId);
+//     // Create an image tag, using two of the colors in a transformation
+//     const imageTag = await createImageTag(publicId, colors[0][0], colors[1][0]);
+//     // Log the image tag to the console
+//     console.log(imageTag);
+// })();
 exports.default = app;

@@ -36,7 +36,6 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.createUser = createUser;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield users_1.default.findOne({ email: req.body.email });
-    console.log(user);
     if (!user) {
         return res.json({ error: 'Invalid credentials' });
     }
