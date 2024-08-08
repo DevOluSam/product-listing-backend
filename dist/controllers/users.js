@@ -20,7 +20,7 @@ const secret = process.env.SECRET;
 const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const existingUser = yield users_1.default.findOne({ email: req.body.email });
     if (existingUser) {
-        return res.json({ error: 'Email already exists' });
+        return res.json({ ExistingUserError: 'Email already exists. Try again' });
     }
     // Hash the password
     const hashedPassword = yield bcryptjs_1.default.hash(req.body.password, 10);
@@ -31,21 +31,21 @@ const createUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         password: hashedPassword
     });
     yield newUser.save();
-    res.json({ message: 'User registered successfully' });
+    res.json({ SuccessMessage: 'User registered successfully' });
 });
 exports.createUser = createUser;
 const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = yield users_1.default.findOne({ email: req.body.email });
     if (!user) {
-        return res.json({ error: 'Invalid credentials' });
+        return res.json({ NotFoundError: 'Account does not exist' });
     }
     // Compare passwords
     const passwordMatch = yield bcryptjs_1.default.compare(req.body.password, user.password);
     if (!passwordMatch) {
-        return res.json({ error: 'Invalid credentials' });
+        return res.json({ IncorrectPassword: 'Incorrect Password' });
     }
     // Generate JWT token
-    const token = jsonwebtoken_1.default.sign({ email: user.email }, secret);
-    res.json({ token });
+    const token = jsonwebtoken_1.default.sign({ email: user.email, userId: user._id }, secret);
+    res.json({ token, createdBy: user._id });
 });
 exports.login = login;

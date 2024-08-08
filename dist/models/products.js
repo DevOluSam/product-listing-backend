@@ -28,7 +28,8 @@ const productSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
     price: { type: String, required: true },
-    userId: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true }
+    image: { type: String, required: true },
+    createdBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: true }
 });
 const Product = mongoose_1.default.model('Product', productSchema);
 exports.default = Product;

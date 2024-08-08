@@ -15,34 +15,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllProducts = exports.getProductByUserId = exports.deleteProduct = exports.editProduct = exports.createProduct = void 0;
 const products_1 = __importDefault(require("../models/products"));
 const users_1 = __importDefault(require("../models/users"));
+const fs_1 = __importDefault(require("fs"));
+const cloudinary_1 = require("cloudinary");
 const createProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    console.log("creating product...");
-    const { name, description, price, userId } = req.body;
-    console.log({ name, description, price, userId });
-    const user = yield users_1.default.findById(userId);
+    const { name, description, price, createdBy } = req.body;
+    let imageUrl;
+    if (req.file) {
+        const filePath = req.file.path;
+        imageUrl = `/uploads/${req.file.filename}`;
+        const result = yield cloudinary_1.v2.uploader.upload(filePath);
+        imageUrl = result.secure_url;
+        fs_1.default.unlinkSync(filePath);
+    }
+    const user = yield users_1.default.findById(createdBy);
     if (!user) {
-        return res.json({ error: 'User not found' });
+        return res.status(404).json({ error: "User not found" });
     }
     const newProduct = new products_1.default({
         name,
         description,
         price,
-        userId: user._id
+        image: imageUrl,
+        createdBy: user._id,
     });
     yield newProduct.save();
-    res.json(newProduct);
+    res.status(201).json(newProduct);
 });
 exports.createProduct = createProduct;
 const editProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { id } = req.params;
-    const { name, description, price } = req.body;
+    const { name, description, price, image } = req.body;
     const updatedProduct = yield products_1.default.findByIdAndUpdate(id, {
         name,
         description,
         price,
+        image,
     }, { new: true, runValidators: true });
     if (!updatedProduct) {
-        return res.json({ error: 'Product not found' });
+        return res.json({ error: "Product not found" });
     }
     res.status(200).json(updatedProduct);
 });
@@ -51,16 +61,18 @@ const deleteProduct = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     const { id } = req.params;
     const deletedProduct = yield products_1.default.findByIdAndDelete(id);
     if (!deletedProduct) {
-        return res.status(404).json({ error: 'Product not found' });
+        return res.status(404).json({ error: "Product not found" });
     }
-    res.status(200).json({ message: 'Product deleted successfully' });
+    res.status(200).json({ message: "Product deleted successfully" });
 });
 exports.deleteProduct = deleteProduct;
 const getProductByUserId = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId } = req.params;
-    const products = yield products_1.default.find({ user: userId });
+    const { createdBy } = req.params;
+    const products = yield products_1.default.find({ createdBy });
     if (!products) {
-        return res.status(404).json({ error: 'No products found for this user' });
+        return res
+            .status(404)
+            .json({ NotFoundError: "No products found for this user" });
     }
     res.status(200).json(products);
 });

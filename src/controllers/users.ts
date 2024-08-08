@@ -9,7 +9,7 @@ export const createUser = async (req: Request, res: Response) => {
 
     const existingUser = await User.findOne({ email: req.body.email });
     if (existingUser) {
-      return res.json({ error: 'Email already exists' });
+      return res.json({ ExistingUserError: 'Email already exists. Try again' });
     }
 
     // Hash the password
@@ -23,7 +23,7 @@ export const createUser = async (req: Request, res: Response) => {
     });
     
     await newUser.save();
-    res.json({ message: 'User registered successfully' });
+    res.json({ SuccessMessage: 'User registered successfully' });
   } 
 
 
@@ -32,16 +32,16 @@ export const login = async (req: Request, res: Response) => {
     const user: any = await User.findOne({ email: req.body.email });
     
     if (!user) {
-      return res.json({ error: 'Invalid credentials' });
+      return res.json({ NotFoundError: 'Account does not exist' });
     }
 
     // Compare passwords
     const passwordMatch = await bcrypt.compare(req.body.password, user.password);
     if (!passwordMatch) {
-      return res.json({ error: 'Invalid credentials' });
+      return res.json({ IncorrectPassword: 'Incorrect Password' });
     }
 
     // Generate JWT token
-    const token = jwt.sign({ email: user.email }, secret);
-    res.json({ token });
+    const token = jwt.sign({ email: user.email, userId: user._id }, secret);
+    res.json({ token,  createdBy: user._id });
   }

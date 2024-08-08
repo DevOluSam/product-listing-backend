@@ -1,12 +1,8 @@
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
 import multer from 'multer'
-import { uploadImage, getAssetInfo, createImageTag, fileUpload } from '../controllers/upload';
+import { createProduct } from '../controllers/products';
 const router = express.Router();
 
-/* GET home page. */
-router.get('/', function(req: Request, res: Response, next: NextFunction) {
-  res.send("GET HOMEPAGE")
-});
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -19,6 +15,6 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-router.post('/upload', upload.single('file'), fileUpload );
+router.post('/product/create', upload.single('image'), createProduct );
 
-export default router;
+export default router; 
